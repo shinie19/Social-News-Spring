@@ -1,6 +1,7 @@
 package com.example.socialnewsspring.service;
 
 import com.example.socialnewsspring.dto.RegisterRequest;
+import com.example.socialnewsspring.exception.SpringRedditException;
 import com.example.socialnewsspring.model.NotificationEmail;
 import com.example.socialnewsspring.model.User;
 import com.example.socialnewsspring.model.VerificationToken;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -55,5 +57,22 @@ public class AuthService {
 
         verificationTokenRepository.save(verificationToken);
         return token;
+    }
+
+    public void verifyAccount(String token) {
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token!"));
+
+        fetchUserAndEnable(verificationToken.get());
+    }
+
+    @Transactional
+    public void fetchUserAndEnable(VerificationToken verificationToken) {
+        String username = verificationToken.getUser().getUsername();
+
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new SpringRedditException("User not found with name - " + username + "!"));
+        user.setEnabled(true);
+
+        userRepository.save(user);
     }
 }
