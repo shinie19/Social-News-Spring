@@ -1,5 +1,6 @@
 package com.example.socialnewsspring.controller;
 
+import com.example.socialnewsspring.dto.LoginRequest;
 import com.example.socialnewsspring.dto.RegisterRequest;
 import com.example.socialnewsspring.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -26,5 +27,10 @@ public class AuthController {
         authService.verifyAccount(token);
 
         return new ResponseEntity<>("Account activated successfully!", HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public void login(@RequestBody LoginRequest loginRequest) {
+        authService.login(loginRequest);
     }
 }
