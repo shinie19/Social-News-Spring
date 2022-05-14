@@ -1,5 +1,6 @@
 package com.example.socialnewsspring.service;
 
+import com.example.socialnewsspring.dto.AuthenticationResponse;
 import com.example.socialnewsspring.dto.LoginRequest;
 import com.example.socialnewsspring.dto.RegisterRequest;
 import com.example.socialnewsspring.exception.SpringRedditException;
@@ -8,9 +9,12 @@ import com.example.socialnewsspring.model.User;
 import com.example.socialnewsspring.model.VerificationToken;
 import com.example.socialnewsspring.repository.UserRepository;
 import com.example.socialnewsspring.repository.VerificationTokenRepository;
+import com.example.socialnewsspring.security.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,18 +27,16 @@ import java.util.UUID;
 public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
-
     @Autowired
     private MailService mailService;
-
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private JwtProvider jwtProvider;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) {
@@ -83,9 +85,14 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public void login(LoginRequest loginRequest) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+    public AuthenticationResponse login(LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                 loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+
+        String token = jwtProvider.generateToken(authenticate);
+
+        return new AuthenticationResponse(token, loginRequest.getUsername());
     }
 
 

@@ -1,5 +1,6 @@
 package com.example.socialnewsspring.controller;
 
+import com.example.socialnewsspring.dto.AuthenticationResponse;
 import com.example.socialnewsspring.dto.LoginRequest;
 import com.example.socialnewsspring.dto.RegisterRequest;
 import com.example.socialnewsspring.service.AuthService;
@@ -30,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public void login(@RequestBody LoginRequest loginRequest) {
-        authService.login(loginRequest);
+    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
     }
 }
