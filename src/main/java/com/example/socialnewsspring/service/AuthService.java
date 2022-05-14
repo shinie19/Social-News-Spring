@@ -15,10 +15,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,14 +50,22 @@ public class AuthService {
 
         userRepository.save(user);
 
-        String token = genarateVerificationToken(user);
+        String token = generateVerificationToken(user);
         mailService.sendMail(new NotificationEmail("Please Activate your Account",
                 user.getEmail(), "Thank you for signing up to Spring Reddit, "
                 + "please click on the below url to activate your account : "
                 + "http://localhost:8080/api/auth/accountVerification/" + token));
     }
 
-    private String genarateVerificationToken(User user) {
+    @Transactional(readOnly = true)
+    User getCurrentUser() {
+        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
+                getContext().getAuthentication().getPrincipal();
+        return userRepository.findByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
+    }
+
+    private String generateVerificationToken(User user) {
         String token = UUID.randomUUID().toString();
 
         VerificationToken verificationToken = new VerificationToken();
