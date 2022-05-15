@@ -15,4 +15,5 @@ public class CommentsDTO {
     private Instant createdDate;
     private String text;
     private String userName;
+    private String duration;
 }
