@@ -14,7 +14,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "reddit_users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

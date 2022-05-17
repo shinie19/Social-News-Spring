@@ -1,5 +1,6 @@
 package com.example.socialnewsspring.service;
 
+import com.example.socialnewsspring.config.AppConfig;
 import com.example.socialnewsspring.dto.AuthenticationResponse;
 import com.example.socialnewsspring.dto.LoginRequest;
 import com.example.socialnewsspring.dto.RefreshTokenRequest;
@@ -43,6 +44,9 @@ public class AuthService {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
+    @Autowired
+    private AppConfig appConfig;
+
     @Transactional
     public void signup(RegisterRequest registerRequest) {
         User user = new User();
@@ -58,7 +62,7 @@ public class AuthService {
         mailService.sendMail(new NotificationEmail("Please Activate your Account",
                 user.getEmail(), "Thank you for signing up to Spring Reddit, "
                 + "please click on the below url to activate your account : "
-                + "http://localhost:8080/api/auth/accountVerification/" + token));
+                + appConfig.getAppUrl() + "/api/auth/accountVerification/" + token));
     }
 
     @Transactional(readOnly = true)
